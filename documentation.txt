@@ -1,0 +1,367 @@
+Security Drift Intelligence - Detailed Documentation
+
+1. Platform Overview
+
+Security Drift Intelligence is a SOC-oriented platform for detecting cloud control drift, triaging priority alerts, simulating adversary scenarios, and supporting analyst incident submission.
+
+It is built as a modular Python system with:
+- backend/ — core engines, parsers, feature generation, rules, reporting
+- dashboard/ — Streamlit UI
+- scripts/ — pipeline orchestration
+- data/ — source event datasets and validation scenarios
+- reports/ — generated output artifacts
+
+---
+
+2. Architecture
+
+2.1 High-level architecture
+The data flow is:
+1. Input ingestion
+   - AWS CloudTrail JSON
+   - Azure audit JSON
+   - CSV drift event exports
+
+2. Normalization
+   - Events are converted into a unified event contract
+   - feature_engineering.enrich_features() fills missing fields and normalizes categories
+
+3. Analysis
+   - SecurityRuleEngine applies deterministic drift rules
+   - MLRiskEngine computes a probability-based risk score
+   - BehavioralAnomalyEngine computes unusualness independently
+   - ThreatPriorityEngine combines all signals into a final priority
+
+4. Reporting + UI
+   - scripts/run_pipeline.py builds model artifacts, scores events, generates reports
+   - dashboard/streamlit_app.py presents interactive SOC dashboards, attack simulation, and incident submission
+
+2.2 Primary components
+- backend/pipeline.py
+  - Orchestrates scoring and training
+  - Uses rule, ML, anomaly, and priority engines
+- backend/feature_engineering.py
+  - Builds derived features and weak labels
+- backend/security_rules.py
+  - Contains deterministic enterprise rules
+- backend/risk_engine.py
+  - Supervised Random Forest risk engine
+- backend/anomaly_engine.py
+  - Isolation Forest behavioral anomaly engine
+- backend/priority_engine.py
+  - Weighted threat prioritization and critical floors
+- backend/attack_simulation.py
+  - Generates adversary-style scenarios from top alerts
+- backend/llm_copilot.py
+  - Produces analyst narratives using deterministic fallback or OpenAI/Gemini
+
+---
+
+3. Data Normalization and Feature Engineering
+
+3.1 Event normalization
+feature_engineering.enrich_features() converts raw fields into:
+- severity_score
+- status_score
+- change_score
+- hour, day_of_week, month
+- is_weekend
+- is_after_hours
+- has_compliance_impact
+- value_changed
+
+It also normalizes:
+- compliance_impact via normalize_compliance()
+- severity, status, change_type, control_type, etc.
+
+3.2 Change context signals
+It detects important text patterns:
+- is_approved_change
+- is_ci_cd_change
+- is_emergency_change
+
+These are derived from event text using regex on approved-change, pipeline/CI-CD, and emergency terms.
+
+3.3 Security weak labels
+derive_security_labels() creates transparent labels from:
+- severity
+- status
+- change type
+- compliance impact
+- after-hours and weekend risk
+- risky control + destructive change
+- approval/CI-CD/emergency context
+
+This is used to train the ML model without requiring ground-truth SOC labels.
+
+---
+
+4. Analysis Algorithms
+
+4.1 Deterministic Rule Engine
+backend/security_rules.py defines a set of enterprise rules:
+- CloudTrail Disabled
+- MFA Disabled
+- Encryption Downgrade
+- Audit Logging Disabled
+- Public Database Exposure
+- Firewall Open To Internet
+- DLP Rule Removed
+- Admin Role Granted
+- Endpoint Protection Disabled
+- Cloud Security Policy Removed
+
+Each rule carries:
+- rule_id
+- name
+- score
+- risk_level
+- explanation
+- business_impact
+- remediation
+- compliance mappings
+- predicate logic
+
+The engine returns:
+- security_rule_score
+- rule_risk_level
+- matched_rules
+- rule_explanations
+- compliance_mappings
+- recommended_remediations
+- recommended_remediation_commands
+
+4.2 ML Risk Engine
+backend/risk_engine.py uses:
+- RandomForestClassifier
+- One-hot encoding for categorical features
+- Numeric features from enriched event data
+
+Features:
+- control type
+- change type
+- compliance impact
+- change reason
+- severity score
+- status score
+- change score
+- time-of-day / day-of-week / month
+- approval / CI-CD / emergency flags
+- value changed
+- compliance impact presence
+
+Training:
+- Stratified train/test split
+- Stratified K-Fold cross-validation
+- Feature importance extraction
+- Model metadata written to .meta.json
+
+Prediction returns:
+- ml_risk_score — probability-weighted numeric score
+- predicted_risk_level
+- ml_confidence
+
+4.3 Behavioral Anomaly Engine
+backend/anomaly_engine.py uses:
+- IsolationForest
+- One-hot encoding and standard scaling
+- Features:
+  - control type
+  - change type
+  - compliance impact
+  - change reason
+  - hour
+  - day of week
+  - weekend flag
+  - after-hours flag
+  - month
+
+Output:
+- anomaly_score
+- anomaly_flag
+- anomaly_confidence
+
+This model is intentionally separate from security severity, focusing on unusual behavior.
+
+4.4 Threat Prioritization
+backend/priority_engine.py computes:
+- priority_score = 0.50 * rule_score + 0.35 * ml_score + 0.15 * anomaly_confidence
+
+Critical floors:
+- CloudTrail Disabled
+- MFA Disabled
+- Encryption Downgrade
+- Audit Logging Disabled
+- Public Database Exposure
+
+Additional floors:
+- critical severity + unresolved drift
+- medium severity + under review
+
+The final scoring logic caps non-critical drift below critical thresholds and maps:
+- >=85 → CRITICAL
+- >=65 → HIGH
+- >=40 → MEDIUM
+- else → LOW
+
+---
+
+5. Attack Simulation
+
+backend/attack_simulation.py selects top-scoring drift alerts and maps them into adversary-style patterns:
+- Evidence Tampering
+- Account Takeover
+- Data Exposure
+- Visibility Evasion
+- Lateral Movement
+- Exfiltration Bypass
+- Privilege Escalation
+- Malware Persistence
+- Cloud Configuration Attack
+
+It generates scenarios with:
+- control_name
+- control_type
+- priority_level
+- priority_score
+- anomaly_confidence
+- matched_rules
+- attack_pattern
+- scenario_description
+- recommended_remediation
+- recommended_remediation_commands
+
+---
+
+6. Reporting
+
+backend/reporting.py creates:
+- executive_audit_report.md
+- executive_audit_report.pdf
+- remediation_playbook.md
+- compliance_violations.csv
+
+It also supports executive summary generation, compliance exposure tables, and remediation guidance.
+
+---
+
+7. Dashboard UI Design
+
+7.1 Overall design goals
+- SOC operator workflow
+- Analyst triage and evidence review
+- Executive summary visibility
+- Attack simulation and incident submission
+- Dark, enterprise-grade visual style
+
+7.2 Page structure
+- Header: SOC Command Center
+- Sidebar: Control filters
+  - Priority tier
+  - Control domain
+  - Compliance impact
+  - Behavioral anomalies only
+
+7.3 Metrics and cards
+Top page metrics include:
+- Open Alerts
+- Anomalies
+- Events Assessed
+- Critical
+- High
+- Compliance Impacts
+
+Styled cards use:
+- dark background
+- border accents
+- SOC note text style
+
+7.4 Tabs
+The dashboard includes:
+- Executive Summary
+- Security Drift
+- Compliance
+- LLM Analyst
+- Attack Simulation
+- Model Assurance
+
+7.5 Executive Summary
+- Priority distribution bar chart
+- Threat heatmap by control domain
+- Top priority alert table
+
+7.6 Security Drift
+- Timeline scatter of priority vs time
+- Investigation queue sorted by priority
+- Progress-style score columns
+
+7.7 Compliance
+- Compliance exposure bar chart
+- Compliance violation table
+- Explodes multi-mapping events by control
+
+7.8 LLM Analyst
+- Select an alert from top-priority filtered list
+- View evidence JSON for a selected event
+- Generate SOC analysis via SecurityCopilot
+- Submit incident to the SOC queue
+
+7.9 Attack Simulation
+- Choose number of simulated scenarios
+- Review top simulated attack patterns
+- Expand remediation details to see commands and guidance
+
+7.10 Model Assurance
+- Shows training metrics if available
+- Cross-validated macro F1
+- Training row count
+- Feature importance
+- Scenario validation accuracy
+
+---
+
+8. Incident Submission Flow
+
+A new analyst submission flow is present:
+- In LLM Analyst, expand Submit incident to SOC queue
+- Enter:
+  - incident title
+  - priority
+  - owner
+  - notes
+- Submit writes to:
+  - reports/incident_submissions.csv
+
+This provides a simple SOC queue storage mechanism.
+
+---
+
+9. Execution and Deployment
+
+9.1 Run the full pipeline
+powershell
+cd "C:\Users\rishi\OneDrive\Documents\New project\security-drift-intelligence"
+& "C:/Users/rishi/Anaconda python/Scripts/conda.exe" run -p "C:\Users\rishi\Anaconda python" --no-capture-output python scripts/run_pipeline.py
+
+This:
+- trains / loads models
+- scores events
+- generates reports
+- builds audit outputs
+
+9.2 Run the dashboard
+powershell
+& "C:/Users/rishi/Anaconda python/Scripts/conda.exe" run -p "C:\Users\rishi\Anaconda python" --no-capture-output python -m streamlit run dashboard\streamlit_app.py
+
+Open:
+- http://localhost:8501
+
+---
+
+10. Summary of Key Strengths
+
+- Hybrid detection: deterministic rules + ML + behavioral anomaly
+- SOC context: incident submission, evidence UI, attack simulation
+- Explainability: rule explanations, compliance mapping, priority reasons
+- Modular design: easy to extend new rules, sources, or UI tabs
+- Report generation: PDF + markdown + CSV outputs

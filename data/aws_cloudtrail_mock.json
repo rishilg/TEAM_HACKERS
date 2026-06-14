@@ -1,0 +1,38 @@
+{
+  "Records": [
+    {
+      "eventVersion": "1.09",
+      "eventTime": "2026-06-12T02:14:31Z",
+      "eventSource": "cloudtrail.amazonaws.com",
+      "eventName": "StopLogging",
+      "awsRegion": "ap-south-1",
+      "sourceIPAddress": "198.51.100.17",
+      "eventID": "aws-ct-001",
+      "userIdentity": {
+        "type": "AssumedRole",
+        "principalId": "AROAXAMPLE:ops-session",
+        "arn": "arn:aws:sts::123456789012:assumed-role/OperationsAdmin/ops-session"
+      },
+      "requestParameters": {"name": "organization-security-trail"},
+      "responseElements": null
+    },
+    {
+      "eventVersion": "1.09",
+      "eventTime": "2026-06-12T03:08:15Z",
+      "eventSource": "ec2.amazonaws.com",
+      "eventName": "AuthorizeSecurityGroupIngress",
+      "awsRegion": "ap-south-1",
+      "sourceIPAddress": "203.0.113.44",
+      "eventID": "aws-sg-002",
+      "userIdentity": {
+        "type": "IAMUser",
+        "arn": "arn:aws:iam::123456789012:user/cloud-operator"
+      },
+      "requestParameters": {
+        "groupId": "sg-0abc123",
+        "ipPermissions": [{"fromPort": 22, "toPort": 22, "cidrIp": "0.0.0.0/0"}]
+      },
+      "responseElements": {"return": true}
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+services:
+  security-drift-intelligence:
+    build: .
+    ports:
+      - "8501:8501"
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - ./reports:/app/reports

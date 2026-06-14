@@ -1,0 +1,27 @@
+scenario_name,control_type,change_type,severity,status,change_reason,hour,compliance_impact,baseline_value,current_value,expected_risk
+CloudTrail Disabled,Logging,Disable,Critical,Drifted,Troubleshooting,2,NIST,cloudtrail_enabled=true,cloudtrail_enabled=false,CRITICAL
+Admin MFA Disabled,Access_Control,Disable,Critical,Drifted,Policy Change,3,PCI,mfa_enabled=true,mfa_enabled=false,CRITICAL
+Encryption Downgrade,Encryption,Modify,Critical,Drifted,Performance Tuning,1,GDPR,AES-256,AES-128,CRITICAL
+Audit Logging Disabled,Logging,Disable,Critical,Drifted,Troubleshooting,0,NIST,logging_enabled=true,logging_enabled=false,CRITICAL
+Public Database Exposure,Firewall,Modify,Critical,Drifted,Emergency Fix,4,PCI,private database,public database 0.0.0.0/0,CRITICAL
+CloudTrail Removed,Logging,Remove,Critical,Drifted,Policy Change,23,NIST,CloudTrail enabled,CloudTrail deleted,CRITICAL
+Root Account MFA Disabled,Access_Control,Disable,Critical,Drifted,Troubleshooting,2,CIS,MFA enabled,MFA disabled,CRITICAL
+Database Encryption Disabled,Encryption,Disable,Critical,Drifted,Emergency Fix,5,PCI,encryption enabled,encryption enabled=false,CRITICAL
+Firewall Open To Internet,Firewall,Modify,High,Drifted,Emergency Fix,4,PCI,10.0.0.0/8,0.0.0.0/0,HIGH
+Admin Role Granted,Access_Control,Modify,High,Drifted,Policy Change,23,ISO,standard user,admin role,HIGH
+Cloud Security Policy Removed,Cloud_Security,Remove,High,Drifted,Troubleshooting,1,NIST,policy enabled,policy removed,HIGH
+DLP Rule Removed,DLP,Remove,High,Drifted,Policy Change,22,GDPR,dlp enabled,dlp removed,HIGH
+Critical Endpoint Protection Disabled,Endpoint,Disable,High,Drifted,Troubleshooting,3,CIS,protection enabled,protection disabled,HIGH
+Public SSH Rule Added,Firewall,Modify,High,Drifted,Emergency Fix,20,CIS,SSH internal only,SSH internet 0.0.0.0/0,HIGH
+Privileged Group Membership Added,Access_Control,Modify,High,Under_Review,Policy Change,21,NIST,user role,admin membership,HIGH
+Emergency Firewall Change,Firewall,Modify,Medium,Under_Review,Emergency Fix,2,NIST,restricted CIDR,temporary vendor CIDR,MEDIUM
+Temporary Diagnostic Access,Access_Control,Modify,Medium,Under_Review,Troubleshooting,1,ISO,standard access,temporary access,MEDIUM
+Temporary Security Group Change,Cloud_Security,Modify,Medium,Under_Review,Emergency Fix,20,NIST,approved rule,temporary rule,MEDIUM
+Logging Retention Reduced,Logging,Modify,Medium,Under_Review,Performance Tuning,18,PCI,365 days,90 days,MEDIUM
+Network Segmentation Rollback,Network_Segmentation,Rollback,Medium,Under_Review,Performance Tuning,16,CIS,segmented,prior topology,MEDIUM
+Routine Security Update,Firewall,Update,Low,Compliant,Security Update,14,NIST,version 10,version 11,LOW
+Approved Patch Deployment,Endpoint,Update,Low,Compliant,Security Update,11,ISO,agent 4.1,agent 4.2,LOW
+Scheduled Key Rotation,Encryption,Update,Low,Remediated,Security Update,10,PCI,key version 7,key version 8,LOW
+Approved DLP Signature Update,DLP,Update,Low,Compliant,Security Update,13,GDPR,signature 20,signature 21,LOW
+Vulnerability Definition Update,Vulnerability,Update,Low,Compliant,Security Update,9,CIS,definitions old,definitions current,LOW
+Cloud Guardrail Remediation,Cloud_Security,Enable,Low,Remediated,Security Update,15,NIST,guardrail disabled,guardrail enabled,LOW

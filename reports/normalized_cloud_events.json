@@ -1,0 +1,90 @@
+[
+  {
+    "event_type":"configuration_change",
+    "control_type":"Logging",
+    "change_type":"Disable",
+    "severity":"Critical",
+    "compliance_impact":"NIST",
+    "change_date":"2026-06-12T02:14:31Z",
+    "source":"AWS CloudTrail",
+    "event_id":"aws-ct-001",
+    "control_name":"CloudTrail Disabled",
+    "baseline_value":"approved_configuration",
+    "current_value":"{\"request\": {\"name\": \"organization-security-trail\"}, \"response\": {}}",
+    "status":"Drifted",
+    "change_reason":"Cloud API Activity",
+    "actor":"arn:aws:sts::123456789012:assumed-role\/OperationsAdmin\/ops-session",
+    "approver":"",
+    "metadata":{
+      "aws_region":"ap-south-1",
+      "source_ip":"198.51.100.17",
+      "raw_event_name":"StopLogging"
+    }
+  },
+  {
+    "event_type":"configuration_change",
+    "control_type":"Firewall",
+    "change_type":"Modify",
+    "severity":"High",
+    "compliance_impact":"NIST",
+    "change_date":"2026-06-12T03:08:15Z",
+    "source":"AWS CloudTrail",
+    "event_id":"aws-sg-002",
+    "control_name":"Firewall Rule Changed",
+    "baseline_value":"approved_configuration",
+    "current_value":"{\"request\": {\"groupId\": \"sg-0abc123\", \"ipPermissions\": [{\"cidrIp\": \"0.0.0.0\/0\", \"fromPort\": 22, \"toPort\": 22}]}, \"response\": {\"return\": true}}",
+    "status":"Drifted",
+    "change_reason":"Cloud API Activity",
+    "actor":"arn:aws:iam::123456789012:user\/cloud-operator",
+    "approver":"",
+    "metadata":{
+      "aws_region":"ap-south-1",
+      "source_ip":"203.0.113.44",
+      "raw_event_name":"AuthorizeSecurityGroupIngress"
+    }
+  },
+  {
+    "event_type":"configuration_change",
+    "control_type":"Access_Control",
+    "change_type":"Disable",
+    "severity":"Critical",
+    "compliance_impact":"NIST",
+    "change_date":"2026-06-12T01:42:00Z",
+    "source":"Azure Audit",
+    "event_id":"azure-ca-001",
+    "control_name":"MFA Disabled",
+    "baseline_value":"approved_configuration",
+    "current_value":"[{\"key\": \"policy\", \"value\": \"Require MFA for administrators\"}]",
+    "status":"Drifted",
+    "change_reason":"Azure Control Plane Activity",
+    "actor":"{'user': {'userPrincipalName': 'cloud.admin@example.com'}}",
+    "approver":"",
+    "metadata":{
+      "resource_id":null,
+      "category":null,
+      "raw_operation":"Disable conditional access MFA policy"
+    }
+  },
+  {
+    "event_type":"configuration_change",
+    "control_type":"Cloud_Security",
+    "change_type":"Modify",
+    "severity":"Medium",
+    "compliance_impact":"NIST",
+    "change_date":"2026-06-12T22:10:00Z",
+    "source":"Azure Audit",
+    "event_id":"azure-role-002",
+    "control_name":"Microsoft.Authorization\/roleAssignments\/write",
+    "baseline_value":"approved_configuration",
+    "current_value":"{\"principal\": \"vendor-user\", \"roleDefinitionName\": \"Owner\"}",
+    "status":"Drifted",
+    "change_reason":"Azure Control Plane Activity",
+    "actor":"breakglass.operator@example.com",
+    "approver":"",
+    "metadata":{
+      "resource_id":"\/subscriptions\/example\/providers\/Microsoft.Authorization\/roleAssignments\/abc",
+      "category":"Administrative",
+      "raw_operation":"Microsoft.Authorization\/roleAssignments\/write"
+    }
+  }
+]

@@ -1,0 +1,20 @@
+{
+  "value": [
+    {
+      "id": "azure-ca-001",
+      "activityDateTime": "2026-06-12T01:42:00Z",
+      "activityDisplayName": "Disable conditional access MFA policy",
+      "initiatedBy": {"user": {"userPrincipalName": "cloud.admin@example.com"}},
+      "additionalDetails": [{"key": "policy", "value": "Require MFA for administrators"}]
+    },
+    {
+      "eventDataId": "azure-role-002",
+      "eventTimestamp": "2026-06-12T22:10:00Z",
+      "operationName": {"value": "Microsoft.Authorization/roleAssignments/write"},
+      "caller": "breakglass.operator@example.com",
+      "resourceId": "/subscriptions/example/providers/Microsoft.Authorization/roleAssignments/abc",
+      "category": "Administrative",
+      "properties": {"roleDefinitionName": "Owner", "principal": "vendor-user"}
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "schema_version": 1,
+  "sklearn_version": "1.6.1",
+  "model_type": "IsolationForest"
+}
